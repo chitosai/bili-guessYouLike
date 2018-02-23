@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+
+  "name": "哔哩哔哩·猜你喜欢",
+  "description": "为你的哔哩哔哩PC首页增加「猜你喜欢」模块",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "http://www.bilibili.com/*",
+    "https://www.bilibili.com/*",
+    "storage"
+  ],
+  "content_scripts":[{
+    "matches":[
+      "http://www.bilibili.com/*",
+      "https://www.bilibili.com/*"
+    ],
+    "js":[
+      "main.js"
+    ],
+    "run_at": "document_idle"
+  }]
+}
