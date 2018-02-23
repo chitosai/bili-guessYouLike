@@ -12,6 +12,7 @@
     "http://www.bilibili.com/*",
     "https://www.bilibili.com/*",
     "storage",
+    "unlimitedStorage",
     "tabs"
   ],
   "content_scripts":[{
