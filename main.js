@@ -22,131 +22,88 @@ const HTTP = {
 const DB = {
 	local: chrome.storage.local,
 	get(key, cb) {
-		DB.local.get(key, cb);
+		DB.local.get(key, (data) => {
+			if( typeof(key) == 'string' ) {
+				typeof(cb) == 'function' && cb(data[key]);
+			} else {
+				typeof(cb) == 'function' && cb(data);
+			}
+		});
 	},
 	set(obj, cb) {
 		DB.local.set(obj, cb);
-	},
-	isVideoAlreadyFetched(aid) {
-		return new Promise((resolve, reject) => {
-			DB.get('fetchedAids', (fetchedAids) => {
-				if( !fetchedAids ) {
-					return false;
-				} else if( fetchedAids.includes(aid) ) {
-					resolve();
-				} else {
-					reject();
-				}
-			});
-		});
-	},
-	videoFetched(aid) {
-		DB.get('fetchedAids', (fetchedAids) => {
-			if( !fetchedAids ) {
-				fetchedAids = [aid];
-			} else {
-				fetchedAids.push(aid);
-				if( fetchedAids.length > 99 ) {
-					fetchedAids.shift();
-				}
-			}
-			DB.set({
-				fetchedAids: fetchedAids
-			});
-		});
 	},
 	saveRecommands(aid, videos) {
 		let obj = {};
 		obj[aid] = videos;
 		DB.set(obj);
-		DB.videoFetched(aid);
 	},
-	getUserViewHistory() {
-		let data = window.localStorage.getItem('biliHistoryData');
-		if( !data ) {
-			return [];
-		}
-		data = JSON.parse(data);
-		// 去重
-		let uniques = [];
-		for( let i = 0; i < data.length; i++ ) {
-			if( uniques.includes(data[i].aid) ) {
-				data.splice(i--, 1);
-			} else {
-				uniques.push(data[i].aid);
+	logUserViewHistory(aid) {
+		DB.getUserViewHistory((history) => {
+			if( !history ) {
+				history = [];
+			} else if( !history.includes(aid) ) {
+				history.push(aid);
+				if( history.length > 30 ) {
+					history.shift();
+				}
 			}
-		}
-		return data;
+			DB.set({history});
+		});
+	},
+	getUserViewHistory(cb) {
+		DB.get('history', (history) => {
+			cb(history);
+		});
 	}
 }
 
 // 获取推荐
 const RECOMMAND = {
-	// 获取当前页面的推荐视频
-	update() {
-		let url = window.location.href,
-				m = /\/av(\d+)\//.exec(url);
-		if( !m ) {
-			return console.error(`找不到av号：${url}`);
-		}
-		RECOMMAND.get(m[1]);
-	},
 	// 获取av号对应的推荐视频
 	get(aid) {
-		DB.isVideoAlreadyFetched(aid).then(() => {
-			// 已经获取过就不用再获取了
-		}).catch(() => {
-			// 没有获取过推荐视频要去服务端获取
-			HTTP.get(`https://comment.bilibili.com/recommendnew,${av}`).then((raw) => {
-				let res;
-				try {
-					res = JSON.parse(raw);
-				} catch(e) {
-					return console.error(`解析recommandnew接口返回值失败：${e}`);
-				}
-				let data = res.data;
-				data.forEach((v) => {
-					v._ts = new Date();
+		DB.get(aid, (videos) => {
+			if( !videos ) {
+				// 没有获取过推荐视频要去服务端获取
+				HTTP.get(`https://comment.bilibili.com/recommendnew,${aid}`).then((raw) => {
+					let res;
+					try {
+						res = JSON.parse(raw);
+					} catch(e) {
+						return console.error(`解析recommandnew接口返回值失败：${e}`);
+					}
+					let data = res.data;
+					data.forEach((v) => {
+						v._ts = new Date();
+					});
+					// 保存到数据库
+					DB.saveRecommands(String(aid), data);
 				});
-				// 保存到数据库
-				DB.saveRecommands(aid, data);
-			});
-		});
-	},
-	// 立即根据当前的用户观看记录生成新的推荐列表
-	prepare() {
-		let vh = DB.getUserViewHistory();
-		let max = Math.min(12, vh.length); // 只根据最近观看的12个视频来生成推荐
-		let recommandsAll = [];
-		for( let i = 0; i < max; i++ ) {
-			let v = vh[i];
-			let videos = DB.get(v.aid);
-			if( !videos.length ) {
-				RECOMMAND.get(v.aid);
 			}
-			recommandsAll = recommandsAll.concat(videos);
-		}
-		let obj = {
-			videos: recommandsAll
-		};
-		DB.set(obj);
+		});
 	},
 	// 根据当前用户访问记录获取n个随机推荐视频
 	query(n) {
-		let videos = DB.get('videos');
-		videos.random = (n) => {
-			let array = this, max = Math.min(array.length, n);
-			let ids = [], items = [];
-			do {
-				let i = Math.floor(Math.random() * array.length);
-				if( !ids.includes(i) ) {
-					ids.push(i);
-					items.push(array[i]);
-				}
-			} while( ids.length < max );
-			return items;
-		}
-		return videos.random(n);
+		DB.getUserViewHistory((vh) => {
+			let max = Math.min(12, vh.length); // 只根据最近观看的12个视频来生成推荐
+			let keys = vh.slice(0, max);
+			DB.get(keys, (recommandArray) => {
+				let allVideos = [];
+				keys.forEach((key) => {
+					allVideos = allVideos.concat(recommandArray[key]);
+				});
+				let max = Math.min(allVideos.length, n);
+				let ids = [], videos = [];
+				while( ids.length < max ) {
+					let i = Math.floor(Math.random() * allVideos.length);
+					if( !ids.includes(i) ) {
+						ids.push(i);
+						videos.push(allVideos[i]);
+					}
+				};
+				UI.insertRecommand(videos);
+			});
+		});
 	}
 }
 
@@ -171,20 +128,26 @@ const UI = {
 		}
 	},
 	// 插入推荐模块
-	insertRecommand() {
-		let videos = RECOMMAND.query(20);
-		console.log(videos)
+	insertRecommand(videos) {
+		console.log('output', videos)
 		return true;
 	}
 }
 
 // 当前是否首页？
 if( UI.isIndex() ) {
-	RECOMMAND.get();
-	UI.insertRecommand();
+	RECOMMAND.query(20);
 }
 // 当前是否视频播放页？
 // 如果是视频播放页，则获取当前视频的相关推荐视频
 if( UI.isVideo() ) {
-	RECOMMAND.update();
+	let url = window.location.href,
+		m = /\/av(\d+)\//.exec(url);
+	if( m ) {
+		let aid = m[1];
+		DB.logUserViewHistory(aid);
+		RECOMMAND.get(aid);
+	} else {
+		console.error(`找不到av号：${url}`);
+	}
 }
