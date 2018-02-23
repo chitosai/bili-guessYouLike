@@ -1,3 +1,5 @@
+let activeTab = null; // 当前tab
+
 // database
 const DB = {
 	local: chrome.storage.local,
@@ -21,7 +23,7 @@ const RECOMMAND = {
 	},
 	// 初始化推荐数据库，如果当前数据库不为空则不做任何事，如果为空就根据用户访问历史去获取推荐视频
 	init() {
-
+		
 	}
 }
 
@@ -29,7 +31,21 @@ const RECOMMAND = {
 const UI = {
 	// 是否首页
 	isIndex() {
-		return true
+		let path = window.location.pathname;
+		if( path == '/' || path == '/index.html' ) {
+			return true
+		} else {
+			return false;
+		}
+	},
+	// 是否视频播放页
+	isVideo() {
+		let path = window.location.pathname;
+		if( path.indexOf('video/av') > -1 ) {
+			return true;
+		} else {
+			return false;
+		}
 	},
 	// 插入推荐模块
 	insertRecommand() {
@@ -42,7 +58,6 @@ if( UI.isIndex() ) {
 	RECOMMAND.init();
 	UI.insertRecommand();
 }
-
 // 当前是否视频播放页？
 // 如果是视频播放页，则获取当前视频的相关推荐视频
 if( UI.isVideo() ) {

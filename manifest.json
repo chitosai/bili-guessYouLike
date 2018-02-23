@@ -11,7 +11,8 @@
   "permissions": [
     "http://www.bilibili.com/*",
     "https://www.bilibili.com/*",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "content_scripts":[{
     "matches":[
