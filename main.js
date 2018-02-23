@@ -129,14 +129,42 @@ const UI = {
 	},
 	// 插入推荐模块
 	insertRecommand(videos) {
-		console.log('output', videos)
-		return true;
+		let node = document.querySelector('#_bili_guessyoulike');
+		if( !node ) {
+			// 复制「动画」模块来做一个「猜你喜欢」
+			let douga = document.querySelector('#bili_douga');
+			node = douga.cloneNode(true);
+			node.id = '_bili_guessyoulike';
+			// 替换文本内容
+			let name = node.querySelector('.name');
+			name.href = undefined;
+			name.textContent = '猜你喜欢';
+			// 移除不需要的dom
+			node.querySelector('.bili-tab').remove();
+			node.querySelector('.link-more').remove();
+			node.querySelector('.sec-rank').remove();
+			// 扩大左边
+			node.querySelector('.new-comers-module').style.width = '100%';
+		}
+		// 移除原有的视频
+		let stage = node.querySelector('.storey-box');
+		stage.style.height = '486px';
+		stage.innerHTML = '';
+		// 插入新视频
+		videos.forEach((video) => {
+			let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${video.stat.view}</span><span class="danmu"><i class="icon"></i>${video.stat.danmaku}</span></p></a></div>`;
+			stage.innerHTML = stage.innerHTML + v;
+		});
+		// 插入页面
+		let ref = document.querySelector('#chief_recommend');
+		ref.insertAdjacentElement('afterend', node);
 	}
 }
 
 // 当前是否首页？
 if( UI.isIndex() ) {
 	RECOMMAND.query(20);
+	window._refreshGuessYouLike = RECOMMAND.query;
 }
 // 当前是否视频播放页？
 // 如果是视频播放页，则获取当前视频的相关推荐视频
