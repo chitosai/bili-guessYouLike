@@ -76,9 +76,14 @@ const RECOMMAND = {
 					} catch(e) {
 						return console.error(`解析recommandnew接口返回值失败：${e}`);
 					}
-					let data = res.data;
-					data.forEach((v) => {
-						v._ts = new Date();
+					// 去掉我们不需要的信息，节约存储空间..
+					let data = res.data.map((v) => {
+						return {
+							aid: v.aid,
+							title: v.title,
+							pic: v.pic,
+							stat: v.stat
+						}
 					});
 					// 保存到数据库
 					DB.saveRecommands(String(aid), data);
