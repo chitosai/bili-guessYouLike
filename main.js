@@ -135,15 +135,23 @@ const UI = {
 		node.id = '_bili_guessyoulike';
 		// 替换文本内容
 		let name = node.querySelector('.name');
-		name.href = undefined;
+		name.href = 'javascript: null;';
 		name.textContent = '猜你喜欢';
 		// 修改结构
-		node.querySelector('.bili-tab').remove();
-		node.querySelector('.sec-rank').remove();
+		let text = node.querySelector('.bili-tab');
+		text.innerHTML = '这是一个非官方的猜你喜欢模块，有任何建议或bug反馈请联系 <a href="https://weibo.com/chitosai" target="_blank">@千歳</a>';
+		text.style.margin = '3px 0 0 0';
+		text.style.color = '#ccc';
+		let rank = node.querySelector('.sec-rank');
+		rank.innerHTML = '';
+		rank.style.width = '80px';
+		rank.style.height = '530px';
+		rank.style.background = '#f0f0f0';
 		let more = node.querySelector('.link-more');
 		// 创建一个「换一换」按钮
 		let btn = document.createElement('div');
 		btn.classList.add('read-push');
+		btn.style.marginLeft = '-5px';
 		btn.innerHTML = '<i class="icon icon_read"></i><span class="info">换一批</span>';
 		// 点这个按钮就通知插件换一批推荐视频
 		btn.addEventListener('click', () => {
@@ -154,7 +162,7 @@ const UI = {
 		more.insertAdjacentElement('afterend', btn);
 		more.remove();
 		// 扩大左边
-		node.querySelector('.new-comers-module').style.width = '100%';
+		node.querySelector('.new-comers-module').style.width = 'calc(100% - 80px)';
 		// 插入页面
 		let ref = document.querySelector('#chief_recommend');
 		ref.insertAdjacentElement('afterend', node);
