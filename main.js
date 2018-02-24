@@ -83,7 +83,7 @@ const RECOMMAND = {
 		});
 	},
 	// 根据当前用户访问记录获取n个随机推荐视频
-	query(n) {
+	recommand(n) {
 		DB.getUserViewHistory((vh) => {
 			let max = Math.min(12, vh.length); // 只根据最近观看的12个视频来生成推荐
 			let keys = vh.slice(0, max);
@@ -101,7 +101,7 @@ const RECOMMAND = {
 						videos.push(allVideos[i]);
 					}
 				};
-				UI.insertRecommand(videos);
+				UI.updateRecommands(videos);
 			});
 		});
 	}
@@ -128,43 +128,65 @@ const UI = {
 		}
 	},
 	// 插入推荐模块
-	insertRecommand(videos) {
-		let node = document.querySelector('#_bili_guessyoulike');
-		if( !node ) {
-			// 复制「动画」模块来做一个「猜你喜欢」
-			let douga = document.querySelector('#bili_douga');
-			node = douga.cloneNode(true);
-			node.id = '_bili_guessyoulike';
-			// 替换文本内容
-			let name = node.querySelector('.name');
-			name.href = undefined;
-			name.textContent = '猜你喜欢';
-			// 移除不需要的dom
-			node.querySelector('.bili-tab').remove();
-			node.querySelector('.link-more').remove();
-			node.querySelector('.sec-rank').remove();
-			// 扩大左边
-			node.querySelector('.new-comers-module').style.width = '100%';
-		}
-		// 移除原有的视频
-		let stage = node.querySelector('.storey-box');
-		stage.style.height = '486px';
-		stage.innerHTML = '';
-		// 插入新视频
-		videos.forEach((video) => {
-			let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${video.stat.view}</span><span class="danmu"><i class="icon"></i>${video.stat.danmaku}</span></p></a></div>`;
-			stage.innerHTML = stage.innerHTML + v;
+	insertRecommands() {
+		// 复制「动画」模块来做一个「猜你喜欢」
+		let douga = document.querySelector('#bili_douga');
+		let node = douga.cloneNode(true);
+		node.id = '_bili_guessyoulike';
+		// 替换文本内容
+		let name = node.querySelector('.name');
+		name.href = undefined;
+		name.textContent = '猜你喜欢';
+		// 修改结构
+		node.querySelector('.bili-tab').remove();
+		node.querySelector('.sec-rank').remove();
+		let more = node.querySelector('.link-more');
+		// 创建一个「换一换」按钮
+		let btn = document.createElement('div');
+		btn.classList.add('read-push');
+		btn.innerHTML = '<i class="icon icon_read"></i><span class="info">换一批</span>';
+		// 点这个按钮就通知插件换一批推荐视频
+		btn.addEventListener('click', () => {
+			window.postMessage({
+				type: 'UPDATE_RECOMMANDS'
+			}, '*');
 		});
+		more.insertAdjacentElement('afterend', btn);
+		more.remove();
+		// 扩大左边
+		node.querySelector('.new-comers-module').style.width = '100%';
 		// 插入页面
 		let ref = document.querySelector('#chief_recommend');
 		ref.insertAdjacentElement('afterend', node);
+		return node;
+	},
+	updateRecommands(videos) {
+		let node = document.querySelector('#_bili_guessyoulike') || UI.insertRecommands();
+		// 移除原有的视频
+		let stage = node.querySelector('.storey-box');
+		stage.style.height = '486px';
+		let html = '';
+		// 插入新视频
+		videos.forEach((video) => {
+			let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${video.stat.view}</span><span class="danmu"><i class="icon"></i>${video.stat.danmaku}</span></p></a></div>`;
+			html += v;
+		});
+		stage.innerHTML = html;
+	},
+	// 监听来自页面的更新请求
+	listen() {
+		window.addEventListener('message', (ev) => {
+			if( ev.data.type && ev.data.type == 'UPDATE_RECOMMANDS' ) {
+				RECOMMAND.recommand(20);
+			}
+		});
 	}
 }
 
 // 当前是否首页？
 if( UI.isIndex() ) {
-	RECOMMAND.query(20);
-	window._refreshGuessYouLike = RECOMMAND.query;
+	RECOMMAND.recommand(20);
+	UI.listen();
 }
 // 当前是否视频播放页？
 // 如果是视频播放页，则获取当前视频的相关推荐视频
