@@ -48,20 +48,16 @@ const DB = {
 	},
 	logUserViewHistory(aid) {
 		DB.getUserViewHistory((history) => {
-			if( !history ) {
-				history = [];
-			} else if( !history.includes(aid) ) {
-				history.push(aid);
-				if( history.length > 30 ) {
-					history.shift();
-				}
+			history.push(aid);
+			if( history.length > 99 ) {
+				history.shift();
 			}
 			DB.set({history});
 		});
 	},
 	getUserViewHistory(cb) {
 		DB.get('history', (history) => {
-			cb(history);
+			cb(history || []);
 		});
 	}
 }
@@ -182,11 +178,15 @@ const UI = {
 		let stage = node.querySelector('.storey-box');
 		stage.style.height = '486px';
 		let html = '';
-		// 插入新视频
-		videos.forEach((video) => {
-			let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${video.stat.view}</span><span class="danmu"><i class="icon"></i>${video.stat.danmaku}</span></p></a></div>`;
-			html += v;
-		});
+		if( videos.length ) {
+			// 插入新视频
+			videos.forEach((video) => {
+				let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${video.stat.view}</span><span class="danmu"><i class="icon"></i>${video.stat.danmaku}</span></p></a></div>`;
+				html += v;
+			});
+		} else {
+			html = '<p style="color: #777; line-height: 486px; text-align: center;">观看记录为空，快去看几个视频吧~</p>';
+		}
 		stage.innerHTML = html;
 	},
 	// 监听来自页面的更新请求
