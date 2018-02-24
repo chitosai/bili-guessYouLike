@@ -37,6 +37,14 @@ const DB = {
 		let obj = {};
 		obj[aid] = videos;
 		DB.set(obj);
+		DB.recommandsCountAdd(videos.length);
+	},
+	recommandsCountAdd(delta) {
+		DB.get('count', (_c) => {
+			let count = _c || 0;
+			count += delta;
+			DB.set({count});
+		});
 	},
 	logUserViewHistory(aid) {
 		DB.getUserViewHistory((history) => {
