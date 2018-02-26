@@ -96,7 +96,6 @@ const RECOMMAND = {
 		DB.getUserViewHistory((vh) => {
 			let max = Math.min(12, vh.length); // 只根据最近观看的12个视频来生成推荐
 			let keys = vh.slice(0, max);
-			console.log(keys)
 			DB.get(keys, (recommandArray) => {
 				let allVideos = [];
 				keys.forEach((key) => {
