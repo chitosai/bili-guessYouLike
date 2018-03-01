@@ -184,9 +184,12 @@ const UI = {
 		stage.style.height = '486px';
 		let html = '';
 		if( videos.length ) {
+			function toWan(number) {
+				return number > 9999 ? ((number/10000).toFixed(1) + '万') : number;
+			}
 			// 插入新视频
 			videos.forEach((video) => {
-				let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${video.stat.view}</span><span class="danmu"><i class="icon"></i>${video.stat.danmaku}</span></p></a></div>`;
+				let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${toWan(video.stat.view)}</span><span class="danmu"><i class="icon"></i>${toWan(video.stat.danmaku)}</span></p></a></div>`;
 				html += v;
 			});
 		} else {
