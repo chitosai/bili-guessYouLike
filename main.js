@@ -33,6 +33,9 @@ const DB = {
 	set(obj, cb) {
 		DB.local.set(obj, cb);
 	},
+	remove(key) {
+		DB.local.remove(key);
+	},
 	saveRecommands(aid, videos) {
 		let obj = {};
 		obj[aid] = videos;
@@ -49,8 +52,16 @@ const DB = {
 	logUserViewHistory(aid) {
 		DB.getUserViewHistory((history) => {
 			history.unshift(aid);
+			// 保持访问记录最多99条
 			if( history.length > 99 ) {
-				history.pop();
+				let removedId = history.pop();
+				// 如果被删除的aid在之后的记录中没有再次访问，那么删除这个aid对应的推荐视频
+				if( !history.includes(removedId) ) {
+					DB.get(removedId, (v) => {
+						DB.remove(removedId);
+						DB.recommandsCountAdd(-v.length);
+					});
+				}
 			}
 			DB.set({history});
 		});
