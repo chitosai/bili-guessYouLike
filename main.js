@@ -227,7 +227,7 @@ if( UI.isIndex() ) {
 // 如果是视频播放页，则获取当前视频的相关推荐视频
 if( UI.isVideo() ) {
 	let url = window.location.href,
-		m = /\/av(\d+)\//.exec(url);
+		m = /\/av(\d+)/.exec(url);
 	if( m ) {
 		let aid = m[1];
 		DB.logUserViewHistory(aid);
