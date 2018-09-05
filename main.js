@@ -1,5 +1,8 @@
 let activeTab = null; // 当前tab
 
+// 判断是否为firefox
+var isFirefox = typeof InstallTrigger !== 'undefined';
+
 // ajax
 const HTTP = {
 	get(url) {
@@ -200,7 +203,7 @@ const UI = {
 			}
 			// 插入新视频
 			videos.forEach((video) => {
-				let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${toWan(video.stat.view)}</span><span class="danmu"><i class="icon"></i>${toWan(video.stat.danmaku)}</span></p></a></div>`;
+				let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.${isFirefox&&"jpg"||"webp"}"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${toWan(video.stat.view)}</span><span class="danmu"><i class="icon"></i>${toWan(video.stat.danmaku)}</span></p></a></div>`;
 				html += v;
 			});
 		} else {
