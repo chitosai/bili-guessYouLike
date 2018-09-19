@@ -5,7 +5,7 @@
   "description": "为你的哔哩哔哩PC首页增加「猜你喜欢」模块",
   "version": "1.6",
 
-    "icons":{
+  "icons":{
   	"16": "icon.png",
   	"48":"icon.png",
   	"128":"icon128.png"
