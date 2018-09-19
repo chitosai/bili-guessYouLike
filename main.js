@@ -119,9 +119,10 @@ const RECOMMAND = {
 				let ids = [], videos = [];
 				while( ids.length < max ) {
 					let i = Math.floor(Math.random() * allVideos.length);
-					if( !ids.includes(i) ) {
-						ids.push(i);
-						videos.push(allVideos[i]);
+					const v = allVideos[i];
+					if( !ids.includes(v.aid) ) {
+						ids.push(v.aid);
+						videos.push(v);
 					}
 				};
 				UI.updateRecommands(videos);
