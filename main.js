@@ -163,11 +163,21 @@ const UI = {
 		name.textContent = '猜你喜欢';
 		// 修改结构
 		let text = node.querySelector('.bili-tab');
-		text.innerHTML = '这是一个非官方的猜你喜欢模块，有任何建议或bug反馈请联系 <a href="https://weibo.com/chitosai" target="_blank">@千歳</a>';
+		while (text.hasChildNodes()) {
+			text.removeChild(text.firstChild);
+		}
+		text.textContent = '这是一个非官方的猜你喜欢模块，有任何建议或bug反馈请联系 ';
+		var info = document.createElement('a');
+		info.href = "https://weibo.com/chitosai";
+		info.target = "_blank";
+		info.textContent = "@千歳";
+		text.appendChild(info);
 		text.style.margin = '3px 0 0 0';
 		text.style.color = '#ccc';
 		let rank = node.querySelector('.sec-rank');
-		rank.innerHTML = '';
+		while (rank.hasChildNodes()) {
+			rank.removeChild(rank.firstChild);
+		}
 		rank.style.width = '80px';
 		rank.style.height = '530px';
 		rank.style.background = '#f0f0f0';
@@ -176,7 +186,13 @@ const UI = {
 		let btn = document.createElement('div');
 		btn.classList.add('read-push');
 		btn.style.marginLeft = '-5px';
-		btn.innerHTML = '<i class="icon icon_read"></i><span class="info">换一批</span>';
+		var btn_i = document.createElement("i");
+		var btn_s = document.createElement("span");
+		btn_i.classList.add("icon","icon_read");
+		btn_s.classList.add("info");
+		btn_s.textContent = "换一批";
+		btn.appendChild(btn_i);
+		btn.appendChild(btn_s);
 		// 点这个按钮就通知插件换一批推荐视频
 		btn.addEventListener('click', () => {
 			window.postMessage({
@@ -198,19 +214,61 @@ const UI = {
 		let stage = node.querySelector('.storey-box');
 		stage.style.height = '486px';
 		let html = '';
+		while (stage.hasChildNodes()) {
+			stage.removeChild(stage.firstChild);
+		}
 		if( videos.length ) {
 			function toWan(number) {
 				return number > 9999 ? ((number/10000).toFixed(1) + '万') : number;
 			}
 			// 插入新视频
 			videos.forEach((video) => {
-				let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.${isFirefox&&"jpg"||"webp"}"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${toWan(video.stat.view)}</span><span class="danmu"><i class="icon"></i>${toWan(video.stat.danmaku)}</span></p></a></div>`;
-				html += v;
+				node1 = document.createElement("img");
+				node1.src = video.pic+"@160w_100h."+(isFirefox&&"jpg"||"webp");
+				node2 = document.createElement("div");
+				node2.classList.add("lazy-img");
+				node2.appendChild(node1);
+				node3 = document.createElement("div");
+				node3.classList.add("pic");
+				node3.appendChild(node2);
+				node4 = document.createElement("a");
+				node4.href = "/video/av"+video.aid+"/";
+				node4.target = "_blank";
+				node4.appendChild(node3);
+				node5 = document.createElement("p");
+				node5.classList.add("t");
+				node5.title = video.title;
+				node5.textContent = video.title;
+				node4.appendChild(node5);
+				node6 = document.createElement("i");
+				node6.classList.add("icon");
+				node7 = document.createElement("span");
+				node7.classList.add("play");
+				node7.textContent = toWan(video.stat.view);
+				node7.insertBefore(node6,node7.firstChild);
+				node8 = document.createElement("i");
+				node8.classList.add("icon");
+				node9 = document.createElement("span");
+				node9.classList.add("danmu");
+				node9.textContent = toWan(video.stat.danmaku);
+				node9.insertBefore(node8,node9.firstChild);
+				node10 = document.createElement("p");
+				node10.classList.add("num");
+				node10.appendChild(node7);
+				node10.appendChild(node9);
+				node4.appendChild(node10);
+				node11 = document.createElement("div");
+				node11.classList.add("spread-module");
+				node11.appendChild(node4);
+				html = node11;
+				stage.appendChild(html);
 			});
 		} else {
-			html = '<p style="color: #777; line-height: 486px; text-align: center;">观看记录为空，快去看几个视频吧~</p>';
+			html = document.createElement("p");
+			html.style.cssText = "color: #777; line-height: 486px; text-align: center;";
+			html.textContent = "观看记录为空，快去看几个视频吧~";
+			stage.appendChild(html);
 		}
-		stage.innerHTML = html;
 	},
 	// 监听来自页面的更新请求
 	listen() {
