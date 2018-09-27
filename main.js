@@ -172,6 +172,13 @@ const UI = {
 		info.target = "_blank";
 		info.textContent = "@千歳";
 		text.appendChild(info);
+		var info2 = document.createTextNode("，Firefox版兼容性问题请反馈");
+		text.appendChild(info2);
+		var info2Link = document.createElement('a');
+		info2Link.href = "https://github.com/niu541412/bili-guessYouLike";
+		info2Link.target = "_blank";
+		info2Link.textContent = "至此";
+		text.appendChild(info2Link);
 		text.style.margin = '3px 0 0 0';
 		text.style.color = '#ccc';
 		let rank = node.querySelector('.sec-rank');
