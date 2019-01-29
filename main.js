@@ -1,8 +1,5 @@
 let activeTab = null; // 当前tab
 
-// 判断是否为firefox
-var isFirefox = typeof InstallTrigger !== 'undefined';
-
 // ajax
 const HTTP = {
 	get(url) {
@@ -231,7 +228,7 @@ const UI = {
 			// 插入新视频
 			videos.forEach((video) => {
 				node1 = document.createElement("img");
-				node1.src = video.pic+"@160w_100h."+(isFirefox&&"jpg"||"webp");
+				node1.src = video.pic+"@160w_100h.webp";
 				node2 = document.createElement("div");
 				node2.classList.add("lazy-img");
 				node2.appendChild(node1);
