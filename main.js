@@ -328,16 +328,38 @@ const UI = {
 	}
 }
 
-// 当前是否首页？
-if( UI.isIndex() ) {
-	// TODO: DELETE!
-	if( !UI.isNewVersion() ) {
-		RECOMMAND_MAX = 20;
+// 20191125 因为数据结构变了，需要清除一次之前的老数据
+// 临时代码，过几个月删掉
+DB.get('_20191125_clear_data', (data) => {
+	if( !data ) {
+		chrome.storage.local.clear(() => {
+			DB.set({'_20191125_clear_data': true});
+			// 当前是否首页？
+			if( UI.isIndex() ) {
+				// TODO: DELETE!
+				if( !UI.isNewVersion() ) {
+					RECOMMAND_MAX = 20;
+				}
+				// /TODO: DELETE!
+				RECOMMAND.recommand(RECOMMAND_MAX);
+				UI.listen();
+			}
+		});
+	} else {
+		// 当前是否首页？
+		if( UI.isIndex() ) {
+			// TODO: DELETE!
+			if( !UI.isNewVersion() ) {
+				RECOMMAND_MAX = 20;
+			}
+			// /TODO: DELETE!
+			RECOMMAND.recommand(RECOMMAND_MAX);
+			UI.listen();
+		}
 	}
-	// /TODO: DELETE!
-	RECOMMAND.recommand(RECOMMAND_MAX);
-	UI.listen();
-}
+});
+
+
 // 当前是否视频播放页？
 // 如果是视频播放页，则获取当前视频的相关推荐视频
 if( UI.isVideo() ) {
