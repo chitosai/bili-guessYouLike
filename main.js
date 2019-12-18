@@ -1,5 +1,5 @@
 let activeTab = null; // 当前tab
-let RECOMMAND_MAX = 10; // 一次获取几个推荐视频
+let recommandMax = 10; // 一次获取几个推荐视频
 
 // ajax
 const HTTP = {
@@ -86,7 +86,7 @@ const RECOMMAND = {
 					try {
 						res = JSON.parse(raw);
 					} catch(e) {
-						return console.error(`解析recommandnew接口返回值失败：${e}`);
+						return console.error(`[哔哩哔哩猜你喜欢] 解析recommandnew接口返回值失败：${e}`);
 					}
 					// 去掉我们不需要的信息，节约存储空间..
 					let data = res.data.map((v) => {
@@ -237,6 +237,7 @@ const UI = {
 			// 20191125 b站改版，几个首页模块变成后渲染了，需要异步获取
 			let refSearchCount = 0;
 			function loopFrame() {
+				// 插入dom
 				let douga = document.querySelector('#bili_douga');
 				if( !douga ) {
 					if( refSearchCount < 99 ) {
@@ -322,7 +323,7 @@ const UI = {
 	listen() {
 		window.addEventListener('message', (ev) => {
 			if( ev.data.type && ev.data.type == 'UPDATE_RECOMMANDS' ) {
-				RECOMMAND.recommand(RECOMMAND_MAX);
+				RECOMMAND.recommand(recommandMax);
 			}
 		});
 	}
@@ -338,10 +339,10 @@ DB.get('_20191125_clear_data', (data) => {
 			if( UI.isIndex() ) {
 				// TODO: DELETE!
 				if( !UI.isNewVersion() ) {
-					RECOMMAND_MAX = 20;
+					recommandMax = 20;
 				}
 				// /TODO: DELETE!
-				RECOMMAND.recommand(RECOMMAND_MAX);
+				RECOMMAND.recommand(recommandMax);
 				UI.listen();
 			}
 		});
@@ -350,10 +351,10 @@ DB.get('_20191125_clear_data', (data) => {
 		if( UI.isIndex() ) {
 			// TODO: DELETE!
 			if( !UI.isNewVersion() ) {
-				RECOMMAND_MAX = 20;
+				recommandMax = 20;
 			}
 			// /TODO: DELETE!
-			RECOMMAND.recommand(RECOMMAND_MAX);
+			RECOMMAND.recommand(recommandMax);
 			UI.listen();
 		}
 	}
@@ -370,6 +371,6 @@ if( UI.isVideo() ) {
 		DB.logUserViewHistory(aid);
 		RECOMMAND.get(aid);
 	} else {
-		console.error(`找不到av号：${url}`);
+		console.error(`[哔哩哔哩猜你喜欢] 找不到av号：${url}`);
 	}
 }
