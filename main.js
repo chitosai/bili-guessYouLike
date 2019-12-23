@@ -250,6 +250,8 @@ const UI = {
 				}
 				const node = douga.cloneNode(true);
 				node.id = '_bili_guessyoulike';
+				// 仅保留视频列表部分，其他东西统统删掉（有时候会有广告
+				Array.from(node.children).filter(c=>!c.classList.contains('report-scroll-module')).forEach(c=>c.remove());
 				// 替换文本内容
 				const name = node.querySelector('.name');
 				name.href = 'javascript: null;';
