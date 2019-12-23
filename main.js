@@ -1,3 +1,5 @@
+const LOG_PREFIX = '[哔哩哔哩猜你喜欢]';
+
 let activeTab = null; // 当前tab
 let recommandMax = 12; // 一次获取几个推荐视频
 
@@ -86,7 +88,7 @@ const RECOMMAND = {
 					try {
 						res = JSON.parse(raw);
 					} catch(e) {
-						return console.error(`[哔哩哔哩猜你喜欢] 解析recommandnew接口返回值失败：${e}`);
+						return console.error(`${LOG_PREFIX} 解析recommandnew接口返回值失败：${e}`);
 					}
 					// 去掉我们不需要的信息，节约存储空间..
 					let data = res.data.map((v) => {
@@ -329,13 +331,15 @@ const UI = {
 			}
 			// 插入新视频
 			videos.forEach((video) => {
-				let v = `<div class="video-card-common"><div class="card-pic"><a href="/video/av${video.aid}" target="_blank"><img src="${video.pic}@206w_116h_1c_100q.webp"><div class="count"><div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${toWan(video.stat.view)}</span><span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${toWan(video.stat.like)}</span></div><div class="right"><span>${toMin(video.duration)}</span></div></div></a></div><a href="/video/av${video.aid}" target="_blank" title="${video.title}" class="title">${video.title}</a><a href="//space.bilibili.com/${video.up.mid}/" target="_blank" class="up"><i class="bilifont bili-icon_xinxi_UPzhu"></i>${video.up.name}</a></div>`;
+				let v = `<div class="video-card-common"><div class="card-pic" data-aid="${video.aid}"><a href="/video/av${video.aid}" target="_blank"><img src="${video.pic}@206w_116h_1c_100q.webp"><div class="count"><div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${toWan(video.stat.view)}</span><span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${toWan(video.stat.like)}</span></div><div class="right"><span>${toMin(video.duration)}</span></div></div></a></div><a href="/video/av${video.aid}" target="_blank" title="${video.title}" class="title">${video.title}</a><a href="//space.bilibili.com/${video.up.mid}/" target="_blank" class="up"><i class="bilifont bili-icon_xinxi_UPzhu"></i>${video.up.name}</a></div>`;
 				html += v;
 			});
 		} else {
 			html = '<p style="color: #777; line-height: 360px; text-align: center; width: 100%;">观看记录为空，快去看几个视频吧~</p>';
 		}
 		stage.innerHTML = html;
+		// 绑定van-framepreview
+		Array.from(stage.querySelectorAll('.card-pic')).forEach(bili_van_framepreview);
 	},
 	// 监听来自页面的更新请求
 	listen() {
@@ -389,6 +393,6 @@ if( UI.isVideo() ) {
 		DB.logUserViewHistory(aid);
 		RECOMMAND.get(aid);
 	} else {
-		console.error(`[哔哩哔哩猜你喜欢] 找不到av号：${url}`);
+		console.error(`${LOG_PREFIX} 找不到av号：${url}`);
 	}
 }
