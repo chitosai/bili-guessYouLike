@@ -1,5 +1,5 @@
 let activeTab = null; // 当前tab
-let recommandMax = 10; // 一次获取几个推荐视频
+let recommandMax = 12; // 一次获取几个推荐视频
 
 // ajax
 const HTTP = {
@@ -279,6 +279,22 @@ const UI = {
 				let ref = document.querySelector('#reportFirst1');
 				ref.insertAdjacentElement('afterend', node);
 				UI.node = node;
+				// 插入样式
+				const styleSheet = document.createElement('style');
+				styleSheet.type = 'text/css';
+				const styleList = [
+					// 把猜你喜欢视频平铺占满100%，每行显示6个
+					'#_bili_guessyoulike .zone-list-box { width: 100% !important; }' + 
+					'#_bili_guessyoulike .video-card-common { width: 15.6%; }' +
+					'#_bili_guessyoulike .video-card-common:nth-child(n+9) { display: block; }' +
+					// 1438px以下宽度时每行只显示5个视频，不然太密集了
+					'@media screen and (max-width: 1438px) { ' + 
+						'#_bili_guessyoulike .video-card-common { width: 19%; }' +
+						'#_bili_guessyoulike .video-card-common:nth-child(n+11) { display: none; }' +
+					'}'
+				]
+				styleSheet.textContent = styleList.join('');
+				document.head.append(styleSheet);
 				resolve();
 			}
 			loopFrame();
