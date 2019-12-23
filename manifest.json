@@ -19,8 +19,7 @@
     "http://www.bilibili.com/*",
     "https://www.bilibili.com/*",
     "storage",
-    "unlimitedStorage",
-    "tabs"
+    "unlimitedStorage"
   ],
   "content_scripts":[{
     "matches":[
