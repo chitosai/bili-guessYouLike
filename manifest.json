@@ -3,7 +3,7 @@
 
   "name": "哔哩哔哩·猜你喜欢",
   "description": "为你的哔哩哔哩PC首页增加「猜你喜欢」模块",
-  "version": "1.6.5",
+  "version": "1.9",
 
   "icons":{
   	"16": "icon.png",
@@ -20,15 +20,15 @@
     "https://www.bilibili.com/*",
     "https://comment.bilibili.com/*",
     "storage",
-    "unlimitedStorage",
-    "tabs"
+    "unlimitedStorage"
   ],
   "content_scripts": [{
     "matches": [
       "http://www.bilibili.com/*",
       "https://www.bilibili.com/*"
     ],
-    "js": [
+    "js":[
+      "bili-functions.js",
       "main.js"
     ],
     "run_at": "document_idle"
