@@ -159,6 +159,17 @@ const UI = {
 			return false;
 		}
 	},
+	// 获取BVID
+	getBVID() {
+		let url = window.location.href,
+				m = /\/BV(\w+)/.exec(url);
+		if( m ) {
+			return m[1];
+		} else {
+			console.error(`${LOG_PREFIX} 找不到BV号：${url}`);
+		}
+		return null;
+	},
 	// 插入推荐模块
 	insertRecommands() {
 		return new Promise((resolve, reject) => {
@@ -278,6 +289,26 @@ const UI = {
 	}
 }
 
+// 在视频页直接点击关联视频并不会刷新页面，而是直接ajax加载改变url，所以我们要监听hashchange
+// 试了下hashchange事件好像监听不到？不知道为啥，写个dirty check吧
+const URLLISTENER = {
+	timer: null,
+	bvid: '',
+	tick() {
+		const bvid = UI.getBVID();
+		if( bvid !== URLLISTENER.bvid ) {
+			DB.logUserViewHistory(bvid);
+			RECOMMAND.get(bvid);
+			URLLISTENER.bvid = bvid;
+			console.log(`${LOG_PREFIX} Logged ${bvid}`);
+		}
+	},
+	init() {
+		URLLISTENER.timer = setInterval(URLLISTENER.tick, 2000); // 2s检查一次应该不算多吧
+		URLLISTENER.tick();
+	}
+}
+
 // 当前是否首页？
 if( UI.isIndex() ) {
 	RECOMMAND.recommand(recommandMax);
@@ -287,13 +318,5 @@ if( UI.isIndex() ) {
 // 当前是否视频播放页？
 // 如果是视频播放页，则获取当前视频的相关推荐视频
 if( UI.isVideo() ) {
-	let url = window.location.href,
-		m = /\/BV(\w+)/.exec(url);
-	if( m ) {
-		let bvid = m[1];
-		DB.logUserViewHistory(bvid);
-		RECOMMAND.get(bvid);
-	} else {
-		console.error(`${LOG_PREFIX} 找不到BV号：${url}`);
-	}
+	URLLISTENER.init();
 }
