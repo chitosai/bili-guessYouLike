@@ -3,7 +3,7 @@
 
   "name": "哔哩哔哩·猜你喜欢",
   "description": "为你的哔哩哔哩PC首页增加「猜你喜欢」模块",
-  "version": "1.9",
+  "version": "1.10",
 
   "icons":{
   	"16": "icon.png",
