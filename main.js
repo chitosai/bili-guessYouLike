@@ -39,9 +39,9 @@ const DB = {
 	remove(key) {
 		DB.local.remove(key);
 	},
-	saveRecommands(aid, videos) {
+	saveRecommands(bvid, videos) {
 		let obj = {};
-		obj[aid] = videos;
+		obj[bvid] = videos;
 		DB.set(obj);
 		DB.recommandsCountAdd(videos.length);
 	},
@@ -52,13 +52,13 @@ const DB = {
 			DB.set({count});
 		});
 	},
-	logUserViewHistory(aid) {
+	logUserViewHistory(bvid) {
 		DB.getUserViewHistory((history) => {
-			history.unshift(aid);
+			history.unshift(bvid);
 			// 保持访问记录最多99条
 			if( history.length > 99 ) {
 				let removedId = history.pop();
-				// 如果被删除的aid在之后的记录中没有再次访问，那么删除这个aid对应的推荐视频
+				// 如果被删除的bvid在之后的记录中没有再次访问，那么删除这个bvid对应的推荐视频
 				if( !history.includes(removedId) ) {
 					DB.get(removedId, (v) => {
 						DB.remove(removedId);
@@ -79,21 +79,26 @@ const DB = {
 // 获取推荐
 const RECOMMAND = {
 	// 获取av号对应的推荐视频
-	get(aid) {
-		DB.get(aid, (videos) => {
+	get(bvid) {
+		DB.get(bvid, (videos) => {
 			if( !videos ) {
 				// 没有获取过推荐视频要去服务端获取
-				HTTP.get(`https://comment.bilibili.com/recommendnew,${aid}`).then((raw) => {
+				HTTP.get(`https://api.bilibili.com/x/web-interface/view/detail?bvid=${bvid}&aid=&jsonp=jsonp&callback=_`).then((_raw) => {
+					let raw = _raw.substring(2, _raw.length - 1);
 					let res;
 					try {
 						res = JSON.parse(raw);
 					} catch(e) {
-						return console.error(`${LOG_PREFIX} 解析recommandnew接口返回值失败：${e}`);
+						return console.error(`${LOG_PREFIX} 解析detail接口返回值失败：${e}`);
+					}
+					if( res.code != 0 ) {
+						return console.error(`${LOG_PREFIX} detail接口的返回值不为0：${res}`);
 					}
 					// 去掉我们不需要的信息，节约存储空间..
-					let data = res.data.map((v) => {
+					let data = res.data.Related.map((v) => {
 						return {
 							aid: v.aid,
+							bvid: v.bvid,
 							title: v.title,
 							pic: v.pic,
 							duration: v.duration,
@@ -102,7 +107,7 @@ const RECOMMAND = {
 						}
 					});
 					// 保存到数据库
-					DB.saveRecommands(String(aid), data);
+					DB.saveRecommands(String(bvid), data);
 				});
 			}
 		});
@@ -122,8 +127,8 @@ const RECOMMAND = {
 				while( ids.length < max ) {
 					let i = Math.floor(Math.random() * allVideos.length);
 					const v = allVideos[i];
-					if( !ids.includes(v.aid) ) {
-						ids.push(v.aid);
+					if( !ids.includes(v.bvid) ) {
+						ids.push(v.bvid);
 						videos.push(v);
 					}
 				};
@@ -152,7 +157,7 @@ const UI = {
 	// 是否视频播放页
 	isVideo() {
 		let path = window.location.pathname;
-		if( path.indexOf('video/av') > -1 ) {
+		if( path.indexOf('video/BV') > -1 ) {
 			return true;
 		} else {
 			return false;
@@ -220,7 +225,7 @@ const UI = {
 			}
 			// 插入新视频
 			videos.forEach((video) => {
-				let v = `<div class="spread-module"><a href="/video/av${video.aid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${toWan(video.stat.view)}</span><span class="danmu"><i class="icon"></i>${toWan(video.stat.danmaku)}</span></p></a></div>`;
+				let v = `<div class="spread-module"><a href="/video/BV${video.bvid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${toWan(video.stat.view)}</span><span class="danmu"><i class="icon"></i>${toWan(video.stat.danmaku)}</span></p></a></div>`;
 				html += v;
 			});
 		} else {
@@ -331,7 +336,7 @@ const UI = {
 			}
 			// 插入新视频
 			videos.forEach((video) => {
-				let v = `<div class="video-card-common"><div class="card-pic" data-aid="${video.aid}"><a href="/video/av${video.aid}" target="_blank"><img src="${video.pic}@206w_116h_1c_100q.webp"><div class="count"><div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${toWan(video.stat.view)}</span><span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${toWan(video.stat.like)}</span></div><div class="right"><span>${toMin(video.duration)}</span></div></div></a></div><a href="/video/av${video.aid}" target="_blank" title="${video.title}" class="title">${video.title}</a><a href="//space.bilibili.com/${video.up.mid}/" target="_blank" class="up"><i class="bilifont bili-icon_xinxi_UPzhu"></i>${video.up.name}</a></div>`;
+				let v = `<div class="video-card-common"><div class="card-pic" data-aid="${video.aid}" data-bvid="${video.bvid}"><a href="/video/${video.bvid}" target="_blank"><img src="${video.pic}@206w_116h_1c_100q.webp"><div class="count"><div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${toWan(video.stat.view)}</span><span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${toWan(video.stat.like)}</span></div><div class="right"><span>${toMin(video.duration)}</span></div></div></a></div><a href="/video/${video.bvid}" target="_blank" title="${video.title}" class="title">${video.title}</a><a href="//space.bilibili.com/${video.up.mid}/" target="_blank" class="up"><i class="bilifont bili-icon_xinxi_UPzhu"></i>${video.up.name}</a></div>`;
 				html += v;
 			});
 		} else {
@@ -387,12 +392,12 @@ DB.get('_20191125_clear_data', (data) => {
 // 如果是视频播放页，则获取当前视频的相关推荐视频
 if( UI.isVideo() ) {
 	let url = window.location.href,
-		m = /\/av(\d+)/.exec(url);
+		m = /\/BV(\w+)/.exec(url);
 	if( m ) {
-		let aid = m[1];
-		DB.logUserViewHistory(aid);
-		RECOMMAND.get(aid);
+		let bvid = m[1];
+		DB.logUserViewHistory(bvid);
+		RECOMMAND.get(bvid);
 	} else {
-		console.error(`${LOG_PREFIX} 找不到av号：${url}`);
+		console.error(`${LOG_PREFIX} 找不到BV号：${url}`);
 	}
 }
