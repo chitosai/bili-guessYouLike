@@ -100,7 +100,7 @@ const RECOMMAND = {
 							aid: v.aid,
 							bvid: v.bvid,
 							title: v.title,
-							pic: v.pic,
+							pic: v.pic.replace('http://', 'https://'), // 返回的图片地址里带了http://，append到dom tree的时候会出警告，我们自己处理掉
 							duration: v.duration,
 							stat: v.stat,
 							up: v.owner
