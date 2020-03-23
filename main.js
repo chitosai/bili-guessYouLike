@@ -1,7 +1,7 @@
 const LOG_PREFIX = '[哔哩哔哩猜你喜欢]';
 
 let activeTab = null; // 当前tab
-let recommandMax = 12; // 一次获取几个推荐视频
+let recommandMax = 20; // 一次获取几个推荐视频
 
 // ajax
 const HTTP = {
@@ -132,11 +132,7 @@ const RECOMMAND = {
 						videos.push(v);
 					}
 				};
-				if( UI.isNewVersion() ) {
-					UI.updateRecommands(videos);
-				} else {
-					UI.updateRecommands_v1(videos);
-				}
+				UI.updateRecommands(videos);
 			});
 		});
 	}
@@ -163,80 +159,6 @@ const UI = {
 			return false;
 		}
 	},
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// 老版本首页代码
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// 
-	// 检测是否灰度到新版
-	isNewVersion() {
-		return !document.querySelector('#home-app');
-	},
-	insertRecommands_v1() {
-		// 复制「动画」模块来做一个「猜你喜欢」
-		let douga = document.querySelector('#bili_douga');
-		let node = douga.cloneNode(true);
-		node.id = '_bili_guessyoulike';
-		// 替换文本内容
-		let name = node.querySelector('.name');
-		name.href = 'javascript: null;';
-		name.textContent = '猜你喜欢';
-		// 修改结构
-		let text = node.querySelector('.bili-tab');
-		text.innerHTML = '这是一个非官方的猜你喜欢模块，有任何建议或bug反馈请联系 <a href="https://weibo.com/chitosai" target="_blank">@千歳</a>';
-		text.style.margin = '3px 0 0 0';
-		text.style.color = '#ccc';
-		let rank = node.querySelector('.sec-rank');
-		rank.innerHTML = '';
-		rank.style.width = '80px';
-		rank.style.height = '530px';
-		rank.style.background = '#f0f0f0';
-		let more = node.querySelector('.link-more');
-		// 创建一个「换一换」按钮
-		let btn = document.createElement('div');
-		btn.classList.add('read-push');
-		btn.style.marginLeft = '-5px';
-		btn.innerHTML = '<i class="icon icon_read"></i><span class="info">换一批</span>';
-		// 点这个按钮就通知插件换一批推荐视频
-		btn.addEventListener('click', () => {
-			window.postMessage({
-				type: 'UPDATE_RECOMMANDS'
-			}, '*');
-		});
-		more.insertAdjacentElement('afterend', btn);
-		more.remove();
-		// 扩大左边
-		node.querySelector('.new-comers-module').style.width = 'calc(100% - 80px)';
-		// 插入页面
-		let ref = document.querySelector('#chief_recommend');
-		ref.insertAdjacentElement('afterend', node);
-		return node;
-	},
-	updateRecommands_v1(videos) {
-		let node = document.querySelector('#_bili_guessyoulike') || UI.insertRecommands_v1();
-		// 移除原有的视频
-		let stage = node.querySelector('.storey-box');
-		stage.style.height = '486px';
-		let html = '';
-		if( videos.length ) {
-			function toWan(number) {
-				return number > 9999 ? ((number/10000).toFixed(1) + '万') : number;
-			}
-			// 插入新视频
-			videos.forEach((video) => {
-				let v = `<div class="spread-module"><a href="/video/BV${video.bvid}/" target="_blank"><div class="pic"><div class="lazy-img"><img src="${video.pic}@160w_100h.webp"></div></div><p title="${video.title}" class="t">${video.title}</p><p class="num"><span class="play"><i class="icon"></i>${toWan(video.stat.view)}</span><span class="danmu"><i class="icon"></i>${toWan(video.stat.danmaku)}</span></p></a></div>`;
-				html += v;
-			});
-		} else {
-			html = '<p style="color: #777; line-height: 486px; text-align: center;">观看记录为空，快去看几个视频吧~</p>';
-		}
-		stage.innerHTML = html;
-	},
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	// 插入推荐模块
 	insertRecommands() {
 		return new Promise((resolve, reject) => {
@@ -356,37 +278,11 @@ const UI = {
 	}
 }
 
-// 20191125 因为数据结构变了，需要清除一次之前的老数据
-// 临时代码，过几个月删掉
-DB.get('_20191125_clear_data', (data) => {
-	if( !data ) {
-		chrome.storage.local.clear(() => {
-			DB.set({'_20191125_clear_data': true});
-			// 当前是否首页？
-			if( UI.isIndex() ) {
-				// TODO: DELETE!
-				if( !UI.isNewVersion() ) {
-					recommandMax = 20;
-				}
-				// /TODO: DELETE!
-				RECOMMAND.recommand(recommandMax);
-				UI.listen();
-			}
-		});
-	} else {
-		// 当前是否首页？
-		if( UI.isIndex() ) {
-			// TODO: DELETE!
-			if( !UI.isNewVersion() ) {
-				recommandMax = 20;
-			}
-			// /TODO: DELETE!
-			RECOMMAND.recommand(recommandMax);
-			UI.listen();
-		}
-	}
-});
-
+// 当前是否首页？
+if( UI.isIndex() ) {
+	RECOMMAND.recommand(recommandMax);
+	UI.listen();
+}
 
 // 当前是否视频播放页？
 // 如果是视频播放页，则获取当前视频的相关推荐视频
