@@ -304,7 +304,7 @@ const URLLISTENER = {
 		}
 	},
 	init() {
-		URLLISTENER.timer = setInterval(URLLISTENER.tick, 2000); // 2s检查一次应该不算多吧
+		URLLISTENER.timer = setInterval(URLLISTENER.tick, 60000); // 想了想，如果用户在某个视频停留时间还不到1min，那估计也是不太感兴趣
 		URLLISTENER.tick();
 	}
 }
