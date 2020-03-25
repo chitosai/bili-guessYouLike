@@ -54,17 +54,22 @@ const DB = {
 	},
 	logUserViewHistory(bvid) {
 		DB.getUserViewHistory((history) => {
+			// 判断浏览记录里是否已经包含这个bvid
+			const exist = history.indexOf(bvid);
+			if( exist > -1 ) {
+				// 如果已存在，就把原有的那个访问记录删掉
+				history.splice(exist, 1);
+			}
+			// 在队列末尾插入bvid
 			history.unshift(bvid);
 			// 保持访问记录最多99条
 			if( history.length > 99 ) {
-				let removedId = history.pop();
-				// 如果被删除的bvid在之后的记录中没有再次访问，那么删除这个bvid对应的推荐视频
-				if( !history.includes(removedId) ) {
-					DB.get(removedId, (v) => {
-						DB.remove(removedId);
-						DB.recommandsCountAdd(-v.length);
-					});
-				}
+				const removedId = history.pop();
+				// 删除这个bvid对应的推荐视频
+				DB.get(removedId, (v) => {
+					DB.remove(removedId);
+					DB.recommandsCountAdd(-v.length);
+				});
 			}
 			DB.set({history});
 		});
