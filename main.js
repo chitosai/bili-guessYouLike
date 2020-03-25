@@ -1,7 +1,7 @@
 const LOG_PREFIX = '[哔哩哔哩猜你喜欢]';
 
 let activeTab = null; // 当前tab
-let recommandMax = 20; // 一次获取几个推荐视频
+let recommandMax = 12; // 一次获取几个推荐视频
 
 // ajax
 const HTTP = {
@@ -304,7 +304,7 @@ const URLLISTENER = {
 		}
 	},
 	init() {
-		URLLISTENER.timer = setInterval(URLLISTENER.tick, 60000); // 想了想，如果用户在某个视频停留时间还不到1min，那估计也是不太感兴趣
+		URLLISTENER.timer = setInterval(URLLISTENER.tick, 10000); // 10s检查一次差不多了吧
 		URLLISTENER.tick();
 	}
 }
