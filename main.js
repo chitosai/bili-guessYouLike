@@ -309,14 +309,27 @@ const URLLISTENER = {
 	}
 }
 
-// 当前是否首页？
-if( UI.isIndex() ) {
-	RECOMMAND.recommand(recommandMax);
-	UI.listen();
+function init() {
+	// 当前是否首页？
+	if( UI.isIndex() ) {
+		RECOMMAND.recommand(recommandMax);
+		UI.listen();
+	}
+	// 当前是否视频播放页？
+	// 如果是视频播放页，则获取当前视频的相关推荐视频
+	if( UI.isVideo() ) {
+		URLLISTENER.init();
+	}
 }
 
-// 当前是否视频播放页？
-// 如果是视频播放页，则获取当前视频的相关推荐视频
-if( UI.isVideo() ) {
-	URLLISTENER.init();
-}
+// 增加了bvid字段，需要清除以前的数据
+DB.get('_20200325_clear_data', (data) => {
+	if( data ) {
+		init();
+	} else {
+		chrome.storage.local.clear(() => {
+			DB.set({'_20200325_clear_data': true});
+			init();
+		});
+	}
+});
