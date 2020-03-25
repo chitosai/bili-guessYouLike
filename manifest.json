@@ -3,7 +3,7 @@
 
   "name": "哔哩哔哩·猜你喜欢",
   "description": "为你的哔哩哔哩PC首页增加「猜你喜欢」模块",
-  "version": "1.10",
+  "version": "1.11",
 
   "icons":{
   	"16": "icon.png",
@@ -18,8 +18,7 @@
   "permissions": [
     "http://www.bilibili.com/*",
     "https://www.bilibili.com/*",
-    "storage",
-    "unlimitedStorage"
+    "storage"
   ],
   "content_scripts":[{
     "matches":[
