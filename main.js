@@ -328,8 +328,8 @@ function init() {
 }
 
 // 增加了bvid字段，需要清除以前的数据
-DB.get('_20200325_clear_data', (data) => {
-	if( data ) {
+DB.get('_20200325_clear_data', (cleared) => {
+	if( cleared ) {
 		init();
 	} else {
 		chrome.storage.local.clear(() => {
