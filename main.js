@@ -223,12 +223,11 @@ const UI = {
 					}, '*');
 				});
 				// 插入页面
-				let ref = document.querySelector('#reportFirst1');
-				ref.insertAdjacentElement('afterend', node);
+				let ref = document.querySelector('#reportFirst2');
+				ref.insertAdjacentElement('beforebegin', node);
 				UI.node = node;
 				// 插入样式
 				const styleSheet = document.createElement('style');
-				styleSheet.type = 'text/css';
 				const styleList = [
 					// 把猜你喜欢视频平铺占满100%，每行显示6个
 					'#_bili_guessyoulike .zone-list-box { width: 100% !important; }' + 
