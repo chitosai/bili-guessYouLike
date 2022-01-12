@@ -278,6 +278,7 @@ const UI = {
             const node = document.createElement('div');
             node.id = '_bili_guessyoulike';
             node.innerHTML = moduleTemplate;
+            node.style.marginBottom = '50px';
 
             // 给「换一换」按钮绑定事件
             const changeBtn = node.querySelector('.primary-btn.roll-btn');
